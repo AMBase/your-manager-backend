@@ -18,13 +18,9 @@ pub struct Config {
 
 impl Config {
     pub fn new() -> Self {
-        for argument in env::args_os() {
-            println!("{argument:?}");
-        }
-
         let s = Server {
-            host: "0.0.0.0".to_string(),
-            port: 8080,
+            host: env::var("HOST").unwrap_or("0.0.0.0".to_string()),
+            port: env::var("PORT").unwrap_or("8080".to_string()).parse::<u16>().unwrap(),
         };
 
         return Self {server: s};
