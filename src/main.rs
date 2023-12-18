@@ -18,7 +18,12 @@ async fn signin() -> impl Responder {
     web::Json(resp_data)
 }
 
-async fn signup() -> impl Responder {
+async fn signup(pool: web::Data<sqlx::PgPool>,) -> impl Responder {
+    let p = pool.get_ref();
+    println!("p = {:?}", p);
+
+    let r = sqlx::query(r#"SELECT 1"#).fetch(p);
+
     let resp_data = SignInRespData {
         access_token: "qwe.asd.zxc".to_string(),
     };
@@ -31,8 +36,6 @@ async fn main() -> std::io::Result<()> {
 
     let conn_url = "postgres://postgres:postgres@localhost/postgres";
     let pool = sqlx::PgPool::connect(&conn_url).await.unwrap();
-
-    println!("pool = {:?}", pool);
 
     println!("Server running on host {} port {}", config.server.host, config.server.port);
     HttpServer::new(move || {
