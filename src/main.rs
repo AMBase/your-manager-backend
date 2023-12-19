@@ -3,6 +3,7 @@ use config::Config;
 use sqlx;
 use actix_web::{web, App, HttpServer, Responder};
 use serde::Serialize;
+use sqlx::Row;
 
 #[derive(Serialize)]
 struct SignInRespData {
@@ -22,7 +23,9 @@ async fn signup(pool: web::Data<sqlx::PgPool>,) -> impl Responder {
     let p = pool.get_ref();
     println!("p = {:?}", p);
 
-    let r = sqlx::query(r#"SELECT 1"#).fetch(p);
+    let row = sqlx::query("SELECT * FROM users").fetch_one(p).await.unwrap();
+    let columns = row.columns();
+    println!("r = {:?}", columns);
 
     let resp_data = SignInRespData {
         access_token: "qwe.asd.zxc".to_string(),
