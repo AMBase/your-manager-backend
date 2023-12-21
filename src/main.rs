@@ -1,4 +1,6 @@
 mod config;
+mod db;
+
 use config::Config;
 use sqlx;
 use actix_web::{web, App, HttpServer, Responder};
@@ -23,9 +25,11 @@ async fn signup(pool: web::Data<sqlx::PgPool>,) -> impl Responder {
     let p = pool.get_ref();
     println!("p = {:?}", p);
 
-    let row = sqlx::query("SELECT * FROM users").fetch_one(p).await.unwrap();
-    let columns = row.columns();
-    println!("r = {:?}", columns);
+    let rows = sqlx::query("SELECT * FROM users").fetch_all(p).await.unwrap();
+    for row in rows {
+        let email: String = row.get("email");
+        println!("{:?}", email);
+    }
 
     let resp_data = SignInRespData {
         access_token: "qwe.asd.zxc".to_string(),
