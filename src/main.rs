@@ -25,10 +25,10 @@ async fn signup(pool: web::Data<sqlx::PgPool>,) -> impl Responder {
     let p = pool.get_ref();
     println!("p = {:?}", p);
 
-    let rows = sqlx::query("SELECT * FROM users").fetch_all(p).await.unwrap();
-    for row in rows {
-        let email: String = row.get("email");
-        println!("{:?}", email);
+    let users = db::users::fetch_all(p).await;
+
+    for user in users {
+        println!("signup user = {:?}", user);
     }
 
     let resp_data = SignInRespData {
