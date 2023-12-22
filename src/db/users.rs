@@ -3,8 +3,8 @@ use sqlx::Row;
 
 #[derive(Debug)]
 pub struct User {
-    id: i32,
-    email: String,
+    pub id: i32,
+    pub email: String,
 }
 pub async fn fetch_all(pool: &PgPool) -> Vec<User> {
     let mut users = vec![];

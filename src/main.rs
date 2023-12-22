@@ -1,11 +1,13 @@
 mod config;
 mod db;
+mod auth;
 
 use config::Config;
 use sqlx;
 use actix_web::{web, App, HttpServer, Responder};
 use serde::Serialize;
 use sqlx::Row;
+
 
 #[derive(Serialize)]
 struct SignInRespData {
@@ -27,13 +29,9 @@ async fn signup(pool: web::Data<sqlx::PgPool>,) -> impl Responder {
 
     let users = db::users::fetch_all(p).await;
 
-    for user in users {
-        println!("signup user = {:?}", user);
-    }
+    let access_token = auth::jwt_encode(users.get(0).unwrap());
 
-    let resp_data = SignInRespData {
-        access_token: "qwe.asd.zxc".to_string(),
-    };
+    let resp_data = SignInRespData { access_token };
     web::Json(resp_data)
 }
 
