@@ -3,3 +3,4 @@
 /target
 
 docker/postgres/data/*
+docker/grafana/data/*
