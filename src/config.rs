@@ -5,13 +5,13 @@ use std::env;
 
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Server {
     pub host: String,
     pub port: u16,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Config {
     pub server: Server,
 }

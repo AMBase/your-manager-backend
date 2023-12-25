@@ -35,16 +35,18 @@ async fn signup(pool: web::Data<sqlx::PgPool>,) -> impl Responder {
 }
 
 pub struct App {
+    config: Option<Config>,
 
 }
 
 impl App {
     pub fn new() -> Self {
-        Self {}
+        Self { config: None }
     }
 
-    pub async fn run(&self) -> std::io::Result<()> {
-        let config = Config::new();
+    pub async fn run(&mut self) -> std::io::Result<()> {
+        self.read_config();
+        let config = self.config.clone().unwrap();
 
         let conn_url = "postgres://postgres:postgres@localhost/postgres";
         let pool = sqlx::PgPool::connect(&conn_url).await.unwrap();
@@ -59,5 +61,10 @@ impl App {
             .bind((config.server.host, config.server.port))?
             .run()
             .await
+    }
+
+    fn read_config(&mut self) {
+        let config = Config::new();
+        self.config = Some(config);
     }
 }
