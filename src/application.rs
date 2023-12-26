@@ -35,36 +35,53 @@ async fn signup(pool: web::Data<sqlx::PgPool>,) -> impl Responder {
 }
 
 pub struct App {
-    config: Option<Config>,
+    config: Config,
 
 }
 
 impl App {
-    pub fn new() -> Self {
-        Self { config: None }
+    pub fn new(config: Config) -> Self {
+        Self { config }
     }
 
     pub async fn run(&mut self) -> std::io::Result<()> {
-        self.read_config();
-        let config = self.config.clone().unwrap();
-
         let conn_url = "postgres://postgres:postgres@localhost/postgres";
         let pool = sqlx::PgPool::connect(&conn_url).await.unwrap();
 
-        println!("Server running on host {} port {}", config.server.host, config.server.port);
+        let host = self.config.server.host.clone();
+        let port = self.config.server.port.clone();
+
+        println!("Server running on host {} port {}", &host, &port);
         HttpServer::new(move || {
             actix_web::App::new()
                 .app_data(web::Data::new(pool.clone()))
                 .route("/api/v1/auth/signin", web::post().to(signin))
                 .route("/api/v1/auth/signup", web::post().to(signup))
         })
-            .bind((config.server.host, config.server.port))?
+            .bind((host, port))?
             .run()
             .await
     }
+}
 
-    fn read_config(&mut self) {
-        let config = Config::new();
-        self.config = Some(config);
+#[derive(Default)]
+pub struct AppBuilder {
+    config: Config,
+}
+
+impl AppBuilder {
+    pub fn new() -> Self {
+        Self {
+            config: Config::new(),
+        }
+    }
+
+    pub fn config(mut self, config: Config) -> Self {
+        self.config = config;
+        self
+    }
+
+    pub fn build(self) -> App {
+        App { config: self.config }
     }
 }

@@ -1,7 +1,7 @@
 mod config;
 mod db;
 mod auth;
-mod app;
+mod application;
 
 
 
@@ -10,5 +10,6 @@ mod app;
 
 #[actix_web::main]
 async fn main() {
-    app::App::new().run().await;
+    let mut app = application::AppBuilder::new().build();
+    app.run().await;
 }
