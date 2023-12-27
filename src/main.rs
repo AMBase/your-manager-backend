@@ -2,10 +2,7 @@ mod config;
 mod db;
 mod auth;
 mod application;
-
-
-
-
+mod handlers;
 
 
 #[actix_web::main]
