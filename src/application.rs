@@ -1,16 +1,11 @@
 use actix_web::{HttpServer, web};
+use actix_web::dev::Response;
 
 use crate::config::Config;
 
 use crate::handlers;
 use sqlx;
-
-
-
-
-
-
-
+use sqlx::{Database, Error};
 
 
 pub struct App {
@@ -24,8 +19,7 @@ impl App {
     }
 
     pub async fn run(&mut self) -> std::io::Result<()> {
-        let conn_url = "postgres://postgres:postgres@localhost/postgres";
-        let pool = sqlx::PgPool::connect(&conn_url).await.unwrap();
+        let pool = self.db_connect().await;
 
         let host = self.config.server.host.clone();
         let port = self.config.server.port.clone();
@@ -40,6 +34,13 @@ impl App {
             .bind((host, port))?
             .run()
             .await
+    }
+
+
+    async fn db_connect(&self) -> sqlx::PgPool {
+        let conn_url = "postgres://postgres:postgres@localhost/postgres";
+        let pool = sqlx::PgPool::connect(&conn_url).await.unwrap();
+        pool
     }
 }
 
