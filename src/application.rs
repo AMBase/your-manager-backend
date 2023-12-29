@@ -1,11 +1,10 @@
 use actix_web::{HttpServer, web};
-use actix_web::dev::Response;
 
 use crate::config::Config;
 
 use crate::handlers;
 use sqlx;
-use sqlx::{Database, Error};
+
 
 
 pub struct App {
@@ -39,7 +38,11 @@ impl App {
 
     async fn db_connect(&self) -> sqlx::PgPool {
         let conn_url = "postgres://postgres:postgres@localhost/postgres";
-        let pool = sqlx::PgPool::connect(&conn_url).await.unwrap();
+        let pool =  match sqlx::PgPool::connect(&conn_url).await {
+            Ok(pool) => pool,
+            Err(sqlx::Error::PoolTimedOut) => panic!("Postgres timeout connection error"),
+            Err(error) => panic!("Postgres connection error: {:?}", error),
+        };
         pool
     }
 }
