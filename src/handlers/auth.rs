@@ -20,6 +20,7 @@ pub async fn signup(pool: web::Data<sqlx::PgPool>,) -> impl Responder {
     println!("p = {:?}", p);
 
     let users = db::users::fetch_all(p).await;
+    let user = db::users::fetch_optional(p, "test@email.com".to_string()).await;
 
     let access_token = auth::jwt_encode(users.get(0).unwrap());
 

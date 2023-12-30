@@ -1,4 +1,5 @@
 use sqlx::PgPool;
+use sqlx::postgres::PgRow;
 use sqlx::Row;
 
 #[derive(Debug)]
@@ -18,4 +19,14 @@ pub async fn fetch_all(pool: &PgPool) -> Vec<User> {
     }
 
     return users;
+}
+
+pub async fn fetch_optional(pool: &PgPool, email: String) -> Option<User> {
+    let mut result = None;
+
+    let row = sqlx::query("SELECT * FROM users WHERE email = ?")
+        .bind(email)
+        .fetch_optional(pool).await.unwrap();
+
+    return result;
 }
