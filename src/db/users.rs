@@ -24,9 +24,17 @@ pub async fn fetch_all(pool: &PgPool) -> Vec<User> {
 pub async fn fetch_optional(pool: &PgPool, email: String) -> Option<User> {
     let mut result = None;
 
-    let row = sqlx::query("SELECT * FROM users WHERE email = ?")
+    let r = sqlx::query("SELECT * FROM users WHERE email = $1")
         .bind(email)
         .fetch_optional(pool).await.unwrap();
+
+    if r.is_some() {
+        let row = r.unwrap();
+        result = Some(User {
+            id: row.get("id"),
+            email: row.get("email"),
+        });
+    }
 
     return result;
 }
