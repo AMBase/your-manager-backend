@@ -2,7 +2,7 @@ use sqlx::PgPool;
 use sqlx::postgres::PgRow;
 use sqlx::Row;
 
-#[derive(Debug)]
+#[derive(Debug, sqlx::FromRow)]
 pub struct User {
     pub id: i32,
     pub email: String,
@@ -22,19 +22,7 @@ pub async fn fetch_all(pool: &PgPool) -> Vec<User> {
 }
 
 pub async fn fetch_optional(pool: &PgPool, email: String) -> Option<User> {
-    let mut result = None;
-
-    let r = sqlx::query("SELECT * FROM users WHERE email = $1")
+    sqlx::query_as::<_,User>("SELECT * FROM users WHERE email = $1")
         .bind(email)
-        .fetch_optional(pool).await.unwrap();
-
-    if r.is_some() {
-        let row = r.unwrap();
-        result = Some(User {
-            id: row.get("id"),
-            email: row.get("email"),
-        });
-    }
-
-    return result;
+        .fetch_optional(pool).await.unwrap()
 }
