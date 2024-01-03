@@ -1,5 +1,4 @@
 use sqlx::PgPool;
-use sqlx::postgres::PgRow;
 use sqlx::Row;
 
 #[derive(Debug, sqlx::FromRow)]
