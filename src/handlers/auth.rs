@@ -1,6 +1,6 @@
 use actix_web::{Responder, web};
 use serde::Serialize;
-
+use serde::Deserialize;
 use crate::{auth, db};
 
 
@@ -15,11 +15,20 @@ pub async fn signin() -> impl Responder {
     web::Json(resp_data)
 }
 
-pub async fn signup(pool: web::Data<sqlx::PgPool>,) -> impl Responder {
+#[derive(Serialize)]
+struct SignUpRespData {
+    access_token: String,
+}
+#[derive(Deserialize)]
+pub struct SignUpReqData {
+    email: String,
+}
+pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPool>,) -> impl Responder {
     let p = pool.get_ref();
     println!("p = {:?}", p);
 
-    let user = db::users::fetch_optional(p, "test@email.com".to_string()).await;
+    let email = data.email.clone();
+    let user = db::users::fetch_optional(p, email).await;
 
     let access_token = auth::jwt_encode(&user.unwrap());
 
