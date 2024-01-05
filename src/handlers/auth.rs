@@ -28,7 +28,10 @@ pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPoo
     println!("p = {:?}", p);
 
     let email = data.email.clone();
-    let user = db::users::fetch_optional(p, email).await;
+    let mut user = db::users::fetch_optional(p, &email).await;
+    if user.is_none() {
+        user = Some(db::users::insert(p, &email).await);
+    }
 
     let access_token = auth::jwt_encode(&user.unwrap());
 
