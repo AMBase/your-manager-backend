@@ -22,7 +22,7 @@ struct ErrorRespData {
 }
 
 #[derive(Serialize)]
-struct SignUpRespData {
+pub struct SignUpRespData {
     access_token: String,
 }
 #[derive(Deserialize)]
@@ -31,7 +31,7 @@ pub struct SignUpReqData {
     password: String,
     password_confirmation: String,
 }
-pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPool>,) -> impl Responder {
+pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPool>,) -> web::Json<impl Responder> {
     let p = pool.get_ref();
     println!("p = {:?}", p);
 
@@ -50,6 +50,7 @@ pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPoo
 
     let access_token = auth::jwt_encode(&user.unwrap());
 
-    let resp_data = SignInRespData { access_token };
+    let resp_data = SignUpRespData { access_token };
     web::Json(resp_data)
 }
+
