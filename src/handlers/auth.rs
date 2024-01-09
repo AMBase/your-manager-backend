@@ -1,7 +1,9 @@
-use actix_web::{Responder, web, HttpResponse};
+use actix_web::{Responder, web, Result, error, http::{header::ContentType, StatusCode},
+                App, HttpResponse,};
 use serde::Serialize;
 use serde::Deserialize;
 use crate::{auth, db};
+use derive_more::{Display, Error};
 
 
 #[derive(Serialize)]
@@ -31,15 +33,43 @@ pub struct SignUpReqData {
     password: String,
     password_confirmation: String,
 }
-pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPool>,) -> web::Json<impl Responder> {
+
+
+
+#[derive(Debug, Display, Error)]
+pub enum MyError {
+    #[display(fmt = "internal error")]
+    InternalError,
+
+    #[display(fmt = "bad request")]
+    BadClientData,
+
+    #[display(fmt = "timeout")]
+    Timeout,
+}
+
+impl error::ResponseError for MyError {
+    fn error_response(&self) -> HttpResponse {
+        HttpResponse::build(self.status_code())
+            .insert_header(ContentType::html())
+            .body(self.to_string())
+    }
+
+    fn status_code(&self) -> StatusCode {
+        match *self {
+            MyError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
+            MyError::BadClientData => StatusCode::BAD_REQUEST,
+            MyError::Timeout => StatusCode::GATEWAY_TIMEOUT,
+        }
+    }
+}
+
+pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPool>,) -> Result<impl Responder, MyError> {
     let p = pool.get_ref();
     println!("p = {:?}", p);
 
     if data.password != data.password_confirmation {
-        return web::Json(ErrorRespData {
-            code: 0,
-            message: "Incorrect password".to_string(),
-        });
+        return Err(MyError::BadClientData);
     }
 
     let email = data.email.clone();
@@ -51,6 +81,6 @@ pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPoo
     let access_token = auth::jwt_encode(&user.unwrap());
 
     let resp_data = SignUpRespData { access_token };
-    web::Json(resp_data)
+    Ok(web::Json(resp_data))
 }
 
