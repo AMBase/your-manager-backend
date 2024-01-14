@@ -1,9 +1,8 @@
-use actix_web::{Responder, web, Result, error, http::{header::ContentType, StatusCode},
-                App, HttpResponse,};
+use actix_web::{Responder, web, Result, error};
 use serde::Serialize;
 use serde::Deserialize;
 use crate::{auth, db};
-use derive_more::{Display, Error};
+
 
 
 #[derive(Serialize)]
@@ -35,41 +34,12 @@ pub struct SignUpReqData {
 }
 
 
-
-#[derive(Debug, Display, Error)]
-pub enum MyError {
-    #[display(fmt = "internal error")]
-    InternalError,
-
-    #[display(fmt = "bad request")]
-    BadClientData,
-
-    #[display(fmt = "timeout")]
-    Timeout,
-}
-
-impl error::ResponseError for MyError {
-    fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code())
-            .insert_header(ContentType::html())
-            .body(self.to_string())
-    }
-
-    fn status_code(&self) -> StatusCode {
-        match *self {
-            MyError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
-            MyError::BadClientData => StatusCode::BAD_REQUEST,
-            MyError::Timeout => StatusCode::GATEWAY_TIMEOUT,
-        }
-    }
-}
-
-pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPool>,) -> Result<impl Responder, MyError> {
+pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPool>,) -> Result<impl Responder> {
     let p = pool.get_ref();
     println!("p = {:?}", p);
 
     if data.password != data.password_confirmation {
-        return Err(MyError::BadClientData);
+        return Err(error::ErrorBadRequest("test"));
     }
 
     let email = data.email.clone();

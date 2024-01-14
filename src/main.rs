@@ -7,6 +7,5 @@ mod handlers;
 
 #[actix_web::main]
 async fn main() {
-    let mut app = application::AppBuilder::new().build();
-    app.run().await;
+    application::AppBuilder::new().build().run().await;
 }
