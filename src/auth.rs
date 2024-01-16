@@ -1,7 +1,9 @@
+use std::collections::BTreeMap;
+
 use hmac::{Hmac, Mac};
 use jwt::SignWithKey;
 use sha2::Sha256;
-use std::collections::BTreeMap;
+
 use crate::db::users::User;
 
 pub fn jwt_encode(user: &User) -> String {

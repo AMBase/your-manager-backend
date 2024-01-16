@@ -1,9 +1,4 @@
-
 use std::env;
-
-
-
-
 
 #[derive(Debug, Clone, Default)]
 pub struct Server {
@@ -20,9 +15,12 @@ impl Config {
     pub fn new() -> Self {
         let s = Server {
             host: env::var("HOST").unwrap_or("0.0.0.0".to_string()),
-            port: env::var("PORT").unwrap_or("8080".to_string()).parse::<u16>().unwrap(),
+            port: env::var("PORT")
+                .unwrap_or("8080".to_string())
+                .parse::<u16>()
+                .unwrap(),
         };
 
-        return Self {server: s};
+        return Self { server: s };
     }
 }

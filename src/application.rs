@@ -1,15 +1,11 @@
-use actix_web::{HttpServer, web};
-
-use crate::config::Config;
-
-use crate::handlers;
+use actix_web::{web, HttpServer};
 use sqlx;
 
-
+use crate::config::Config;
+use crate::handlers;
 
 pub struct App {
     config: Config,
-
 }
 
 impl App {
@@ -27,18 +23,23 @@ impl App {
         HttpServer::new(move || {
             actix_web::App::new()
                 .app_data(web::Data::new(pool.clone()))
-                .route("/api/v1/auth/signin", web::post().to(handlers::auth::signin))
-                .route("/api/v1/auth/signup", web::post().to(handlers::auth::signup))
+                .route(
+                    "/api/v1/auth/signin",
+                    web::post().to(handlers::auth::signin),
+                )
+                .route(
+                    "/api/v1/auth/signup",
+                    web::post().to(handlers::auth::signup),
+                )
         })
-            .bind((host, port))?
-            .run()
-            .await
+        .bind((host, port))?
+        .run()
+        .await
     }
-
 
     async fn db_connect(&self) -> sqlx::PgPool {
         let conn_url = "postgres://postgres:postgres@localhost/postgres";
-        let pool =  match sqlx::PgPool::connect(&conn_url).await {
+        let pool = match sqlx::PgPool::connect(&conn_url).await {
             Ok(pool) => pool,
             Err(sqlx::Error::PoolTimedOut) => panic!("Postgres timeout connection error"),
             Err(error) => panic!("Postgres connection error: {:?}", error),
@@ -65,6 +66,8 @@ impl AppBuilder {
     }
 
     pub fn build(self) -> App {
-        App { config: self.config }
+        App {
+            config: self.config,
+        }
     }
 }

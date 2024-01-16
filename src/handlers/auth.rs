@@ -1,14 +1,13 @@
-use actix_web::{Responder, web, Result, error};
-use serde::Serialize;
-use serde::Deserialize;
+use actix_web::{error, web, Responder, Result};
+use serde::{Deserialize, Serialize};
+
 use crate::{auth, db};
-
-
 
 #[derive(Serialize)]
 struct SignInRespData {
     access_token: String,
 }
+
 pub async fn signin() -> impl Responder {
     let resp_data = SignInRespData {
         access_token: "qwe.asd.zxc".to_string(),
@@ -26,6 +25,7 @@ struct ErrorRespData {
 pub struct SignUpRespData {
     access_token: String,
 }
+
 #[derive(Deserialize)]
 pub struct SignUpReqData {
     email: String,
@@ -33,8 +33,10 @@ pub struct SignUpReqData {
     password_confirmation: String,
 }
 
-
-pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPool>,) -> Result<impl Responder> {
+pub async fn signup(
+    data: web::Json<SignUpReqData>,
+    pool: web::Data<sqlx::PgPool>,
+) -> Result<impl Responder> {
     let p = pool.get_ref();
     println!("p = {:?}", p);
 
@@ -53,4 +55,3 @@ pub async fn signup(data: web::Json<SignUpReqData>,  pool: web::Data<sqlx::PgPoo
     let resp_data = SignUpRespData { access_token };
     Ok(web::Json(resp_data))
 }
-
