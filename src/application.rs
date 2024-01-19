@@ -31,10 +31,14 @@ impl App {
                     "/api/v1/auth/signup",
                     web::post().to(handlers::auth::signup),
                 )
+                .route(
+                    "/api/v1/userinfo",
+                    web::get().to(handlers::users::userinfo),
+                )
         })
-        .bind((host, port))?
-        .run()
-        .await
+            .bind((host, port))?
+            .run()
+            .await
     }
 
     async fn db_connect(&self) -> sqlx::PgPool {
