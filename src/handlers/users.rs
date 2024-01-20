@@ -22,6 +22,11 @@ pub async fn userinfo(
         return Err(error::ErrorUnauthorized("Unauthorized"));
     }
 
+    let header_value = authorization.unwrap();
+    let token = header_value.to_str().unwrap_or("").replacen("Bearer ", "", 1);
+    let token_data = auth::jwt_decode(&token);
+    println!("token_data = {:?}", token_data);
+
     // let mut user = db::users::fetch_optional(p, &email).await;
     // if user.is_none() {
     //     user = Some(db::users::insert(p, &email).await);
