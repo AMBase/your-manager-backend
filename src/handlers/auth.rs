@@ -5,14 +5,36 @@ use crate::{auth, db};
 
 #[derive(Serialize)]
 struct SignInRespData {
+    #[serde(rename(serialize = "accessToken", deserialize = "accessToken"))]
     access_token: String,
 }
 
-pub async fn signin() -> impl Responder {
-    let resp_data = SignInRespData {
-        access_token: "qwe.asd.zxc".to_string(),
-    };
-    web::Json(resp_data)
+#[derive(Deserialize)]
+pub struct SignInReqData {
+    email: String,
+    password: String,
+}
+
+pub async fn signin(
+    pool: web::Data<sqlx::PgPool>,
+    data: web::Json<SignInReqData>,
+) -> Result<impl Responder> {
+    let p = pool.get_ref();
+
+    let mut result = db::users::fetch_optional(p, &data.email).await;
+    if result.is_none() {
+        return Err(error::ErrorUnauthorized("Unauthorized"));
+    }
+
+    let user = result.unwrap();
+    if data.password != user.password {
+        return Err(error::ErrorUnauthorized("Unauthorized"));
+    }
+
+    let access_token = auth::jwt_encode(&user);
+    let resp_data = SignInRespData { access_token };
+
+    Ok(web::Json(resp_data))
 }
 
 #[derive(Serialize)]

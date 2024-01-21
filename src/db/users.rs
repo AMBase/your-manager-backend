@@ -5,6 +5,7 @@ use sqlx::Row;
 pub struct User {
     pub id: i32,
     pub email: String,
+    pub password: String,
 }
 
 pub async fn fetch_all(pool: &PgPool) -> Vec<User> {
@@ -17,6 +18,7 @@ pub async fn fetch_all(pool: &PgPool) -> Vec<User> {
             User {
                 id: r.get("id"),
                 email: r.get("email"),
+                password: r.get("password"),
             }
         })
         .collect()
@@ -40,5 +42,6 @@ pub async fn insert(pool: &PgPool, email: &String) -> User {
     User {
         id: result.get("id"),
         email: result.get("email"),
+        password: result.get("password"),
     }
 }

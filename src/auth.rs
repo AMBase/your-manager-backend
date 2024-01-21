@@ -16,13 +16,9 @@ pub fn jwt_encode(user: &User) -> String {
     claims.sign_with_key(&key).unwrap()
 }
 
-pub fn jwt_decode(token: &String) -> User {
+pub fn jwt_decode(token: &String) -> BTreeMap<String, String> {
     let key: Hmac<Sha256> = Hmac::new_from_slice(b"some-secret").unwrap();
     let token: Token<Header, BTreeMap<String, String>, _> = token.verify_with_key(&key).unwrap();
-    let header = token.header();
-    let claims = token.claims();
-
-    println!("claims = {:?}", claims);
-
-    User { id: 1, email: "q".to_string() }
+    
+    token.claims().clone()
 }
