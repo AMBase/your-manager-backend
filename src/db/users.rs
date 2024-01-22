@@ -45,3 +45,11 @@ pub async fn insert(pool: &PgPool, email: &String) -> User {
         password: result.get("password"),
     }
 }
+
+pub async fn get_by_id(pool: &PgPool, id: &i32) -> Option<User> {
+    sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
+        .bind(id)
+        .fetch_optional(pool)
+        .await
+        .unwrap()
+}
