@@ -2,11 +2,21 @@ use actix_web::{error, web, HttpRequest, Responder, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::{auth, db};
+use crate::domain::aggregates::User;
 
 #[derive(Serialize)]
 struct UserinfoRespData {
     id: i32,
     email: String,
+}
+
+impl From<User> for UserinfoRespData {
+    fn from(user: User) -> Self {
+        Self {
+            id: user.id,
+            email: user.email,
+        }
+    }
 }
 
 
@@ -37,8 +47,7 @@ pub async fn userinfo(
         return Err(error::ErrorUnauthorized("Unauthorized"));
     }
     let user = result.unwrap();
-
-    let resp_data = UserinfoRespData { id: user.id, email: user.email };
+    let resp_data: UserinfoRespData = user.into();
 
     Ok(web::Json(resp_data))
 }

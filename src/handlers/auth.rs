@@ -69,7 +69,7 @@ pub async fn signup(
     let email = data.email.clone();
     let mut user = db::users::fetch_optional(p, &email).await;
     if user.is_none() {
-        user = Some(db::users::insert(p, &email).await);
+        user = Some(db::users::insert(p, &email, &data.password).await);
     }
 
     let access_token = auth::jwt_encode(&user.unwrap());

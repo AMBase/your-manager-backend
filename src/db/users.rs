@@ -1,27 +1,24 @@
-use sqlx::PgPool;
+use sqlx::{FromRow, PgPool};
+use sqlx::postgres::PgRow;
 use sqlx::Row;
+use crate::domain::aggregates::User;
 
-#[derive(Debug, sqlx::FromRow)]
-pub struct User {
-    pub id: i32,
-    pub email: String,
-    pub password: String,
+impl FromRow<'_, PgRow> for User {
+    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
+        Ok(Self {
+            id: row.get("id"),
+            email: row.get("email"),
+            password: row.get("password"),
+        })
+    }
 }
 
+
 pub async fn fetch_all(pool: &PgPool) -> Vec<User> {
-    sqlx::query("SELECT * FROM users")
+    sqlx::query_as::<_, User>("SELECT * FROM users")
         .fetch_all(pool)
         .await
         .unwrap()
-        .iter()
-        .map(|r| {
-            User {
-                id: r.get("id"),
-                email: r.get("email"),
-                password: r.get("password"),
-            }
-        })
-        .collect()
 }
 
 pub async fn fetch_optional(pool: &PgPool, email: &String) -> Option<User> {
@@ -32,18 +29,13 @@ pub async fn fetch_optional(pool: &PgPool, email: &String) -> Option<User> {
         .unwrap()
 }
 
-pub async fn insert(pool: &PgPool, email: &String) -> User {
-    let result = sqlx::query("INSERT INTO users (email) VALUES ($1) RETURNING *")
+pub async fn insert(pool: &PgPool, email: &String, password: &String) -> User {
+    sqlx::query_as::<_, User>("INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *")
         .bind(email.clone())
+        .bind(password.clone())
         .fetch_one(pool)
         .await
-        .unwrap();
-
-    User {
-        id: result.get("id"),
-        email: result.get("email"),
-        password: result.get("password"),
-    }
+        .unwrap()
 }
 
 pub async fn get_by_id(pool: &PgPool, id: &i32) -> Option<User> {

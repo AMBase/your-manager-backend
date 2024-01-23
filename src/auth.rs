@@ -5,7 +5,7 @@ use jwt::SignWithKey;
 use jwt::{AlgorithmType, Header, Token, VerifyWithKey};
 use sha2::Sha256;
 
-use crate::db::users::User;
+use crate::domain::aggregates::User;
 
 
 pub fn jwt_encode(user: &User) -> String {
