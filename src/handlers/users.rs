@@ -24,9 +24,6 @@ pub async fn userinfo(
     request: HttpRequest,
     pool: web::Data<sqlx::PgPool>,
 ) -> Result<impl Responder> {
-    let p = pool.get_ref();
-    println!("p = {:?}", p);
-
     let authorization = request.headers().get("Authorization");
     if authorization.is_none() {
         return Err(error::ErrorUnauthorized("Unauthorized"));
@@ -42,7 +39,7 @@ pub async fn userinfo(
         return Err(error::ErrorUnauthorized("Unauthorized"));
     }
 
-    let result = db::users::get_by_id(p, &user_id.unwrap()).await;
+    let result = db::users::get_by_id(&pool, &user_id.unwrap()).await;
     if result.is_none() {
         return Err(error::ErrorUnauthorized("Unauthorized"));
     }

@@ -19,9 +19,7 @@ pub async fn signin(
     pool: web::Data<sqlx::PgPool>,
     data: web::Json<SignInReqData>,
 ) -> Result<impl Responder> {
-    let p = pool.get_ref();
-
-    let mut result = db::users::fetch_optional(p, &data.email).await;
+    let mut result = db::users::fetch_optional(&pool, &data.email).await;
     if result.is_none() {
         return Err(error::ErrorUnauthorized("Unauthorized"));
     }
@@ -59,17 +57,14 @@ pub async fn signup(
     data: web::Json<SignUpReqData>,
     pool: web::Data<sqlx::PgPool>,
 ) -> Result<impl Responder> {
-    let p = pool.get_ref();
-    println!("p = {:?}", p);
-
     if data.password != data.password_confirmation {
         return Err(error::ErrorBadRequest("test"));
     }
 
     let email = data.email.clone();
-    let mut user = db::users::fetch_optional(p, &email).await;
+    let mut user = db::users::fetch_optional(&pool, &email).await;
     if user.is_none() {
-        user = Some(db::users::insert(p, &email, &data.password).await);
+        user = Some(db::users::insert(&pool, &email, &data.password).await);
     }
 
     let access_token = auth::jwt_encode(&user.unwrap());

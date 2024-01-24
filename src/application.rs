@@ -16,13 +16,15 @@ impl App {
     pub async fn run(&mut self) -> std::io::Result<()> {
         let pool = self.db_connect().await;
 
+
         let host = self.config.server.host.clone();
         let port = self.config.server.port.clone();
 
         println!("Server running on host {} port {}", &host, &port);
         HttpServer::new(move || {
+            let pool = pool.clone();
             actix_web::App::new()
-                .app_data(web::Data::new(pool.clone()))
+                .app_data(web::Data::new(pool))
                 .route(
                     "/api/v1/auth/signin",
                     web::post().to(handlers::auth::signin),
